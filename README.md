@@ -1,4 +1,3 @@
-
 # 🚀 AI-Powered Cybersecurity SOC Platform
 
 > A full-stack **Security Operations Center (SOC) simulation system** powered by Machine Learning for **real-time cyber threat detection, incident response, and security analytics**.
@@ -109,8 +108,8 @@ TP: 9740
 ### 📉 Detection Metrics
 
 * False Positive Rate (FPR)
-* False Negatives minimized (important for SOC)
-* High Recall ensures attack detection
+* False Negatives minimized (critical for SOC environments)
+* High Recall ensures maximum attack detection
 
 ---
 
@@ -118,10 +117,38 @@ TP: 9740
 
 * CICIoT Dataset (Latest / 2025)
 * UNSW-NB15 Dataset
-* Intrusion Detection datasets
+* IDS Intrusion datasets
 
-👉 Total size: **~5.7 million records**
-👉 Used for training: **~100,000 samples (optimized)**
+👉 Total dataset size: **~5.7 million records**
+👉 Used for training: **~90,000 samples (optimized subset)**
+
+---
+
+## ⚠️ Dataset & Model Note
+
+Due to GitHub file size limitations, the following are **not included** in this repository:
+
+* `dataset/`
+* `ai_model/`
+* `model.pkl`
+* `metrics.json`
+* `soc.db`
+
+These files are excluded using `.gitignore` to keep the repository lightweight and maintainable.
+
+### 🧠 Reproducing Results
+
+To regenerate the model and metrics:
+
+```bash
+py -3.10 train_model.py
+```
+
+This will generate:
+
+* `model.pkl`
+* `metrics.json`
+* Confusion matrix and performance graphs
 
 ---
 
@@ -129,11 +156,6 @@ TP: 9740
 
 ```
 AI-SOC-Platform/
-│
-├── ai_model/
-│   └── model.pkl
-│
-├── dataset/
 │
 ├── static/
 │   ├── confusion_matrix.png
@@ -146,9 +168,11 @@ AI-SOC-Platform/
 │   ├── login.html
 │   └── report.html
 │
+├── screenshots/
+│
 ├── app.py
 ├── train_model.py
-├── metrics.json
+├── requirements.txt
 └── README.md
 ```
 
@@ -199,7 +223,7 @@ Password: admin123
 
 ## 🗄️ Database
 
-* SQLite database (`soc.db`)
+* SQLite (`soc.db`)
 * Stores:
 
   * Users
@@ -250,4 +274,3 @@ Includes:
 * SIEM integration
 
 ---
-
