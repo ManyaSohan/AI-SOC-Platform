@@ -310,14 +310,13 @@ AI-SOC-Platform/
 
 ### Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+
 
 ### Incidents
 
-![Incidents](screenshots/incidents.png)
 
 ### Report
 
-![Report](screenshots/report.png)
+
 
 ---
