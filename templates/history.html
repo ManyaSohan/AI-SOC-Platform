@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SOC History</title>
+
+<style>
+body{
+background:#020617;
+color:white;
+font-family:Arial;
+}
+
+input, select{
+padding:6px;
+margin:6px;
+background:#020617;
+color:white;
+border:1px solid #38bdf8;
+}
+
+table{
+width:98%;
+border-collapse:collapse;
+margin:auto;
+}
+
+th,td{
+border:1px solid #334155;
+padding:6px;
+text-align:center;
+}
+
+th{
+background:#020617;
+color:#38bdf8;
+position:sticky;
+top:0;
+}
+
+.high{background:#7f1d1d}
+.medium{background:#78350f}
+.low{background:#022c22}
+</style>
+</head>
+
+<body>
+
+<h2>SOC Attack History</h2>
+
+<button onclick="location.href='/'">← Back to Dashboard</button>
+
+<input placeholder="Search IP" onkeyup="filterIP(this.value)">
+
+<select onchange="filterSeverity(this.value)">
+<option value="">All</option>
+<option value="High">High</option>
+<option value="Medium">Medium</option>
+<option value="Low">Low</option>
+</select>
+
+<table>
+<thead>
+<tr>
+<th>ID</th><th>IP</th><th>Country</th><th>Attack</th>
+<th>Severity</th><th>Risk</th><th>Phase</th><th>Time</th>
+</tr>
+</thead>
+<tbody id="hist"></tbody>
+</table>
+
+<script>
+let rows = [];
+const hist = document.getElementById("hist");
+
+// Load data from backend
+fetch("/api/history")
+.then(r => r.json())
+.then(data => {
+    rows = data;
+    render(rows);
+})
+.catch(err => {
+    console.error("Error loading history:", err);
+    hist.innerHTML = "<tr><td colspan='8'>Failed to load data</td></tr>";
+});
+
+// Render table
+function render(data){
+    let h = "";
+
+    data.forEach(r => {
+        let severity = r[7];
+
+        let c = severity === "High" ? "high" :
+                severity === "Medium" ? "medium" : "low";
+
+        h += `
+        <tr class="${c}">
+            <td>${r[0]}</td>
+            <td>${r[1]}</td>
+            <td>${r[2]}</td>
+            <td>${r[6]}</td>
+            <td>${r[7]}</td>
+            <td>${r[8]}</td>
+            <td>${r[13]}</td>
+            <td>${r[14]}</td>
+        </tr>`;
+    });
+
+    hist.innerHTML = h;
+}
+
+// Filter by IP
+function filterIP(v){
+    render(rows.filter(r => r[1].toLowerCase().includes(v.toLowerCase())));
+}
+
+// Filter by severity
+function filterSeverity(v){
+    if(!v){
+        render(rows);
+    } else {
+        render(rows.filter(r => r[7] === v));
+    }
+}
+</script>
+
+</body>
+</html>
