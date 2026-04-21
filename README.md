@@ -152,6 +152,93 @@ This will generate:
 
 ---
 
+## 🔄 System Flow Diagram
+
+![System Flow](screenshots/flow_diagram.png)
+
+### Flow Explanation
+
+1. User logs into the SOC platform
+2. Network/activity data is captured
+3. Features are extracted and processed
+4. ML model predicts **Attack / Normal**
+5. If attack detected → Incident created
+6. Data stored in database
+7. Dashboard updates in real-time
+8. Reports generated with analytics
+
+---
+
+## 🔐 Authentication System
+
+* Login-based authentication
+* Session handling using Flask
+* Protected routes (Dashboard, Incidents, Reports)
+
+### Demo Credentials
+
+```
+Username: admin  
+Password: admin123  
+```
+
+> ⚠️ Demo only. Production systems should use secure password hashing.
+
+---
+
+## 📥 Clone & Run the Project
+
+### 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/ManyaSohan/AI-SOC-Platform.git
+cd AI-SOC-Platform
+```
+
+---
+
+### 2️⃣ Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 3️⃣ Add Dataset
+
+Place dataset inside:
+
+```
+dataset/
+```
+
+---
+
+### 4️⃣ Train Model
+
+```bash
+py -3.10 train_model.py
+```
+
+---
+
+### 5️⃣ Run Application
+
+```bash
+py -3.10 app.py
+```
+
+---
+
+### 6️⃣ Open in Browser
+
+```
+http://127.0.0.1:5000/login
+```
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -169,6 +256,10 @@ AI-SOC-Platform/
 │   └── report.html
 │
 ├── screenshots/
+│   ├── dashboard.png
+│   ├── incidents.png
+│   ├── report.png
+│   └── flow_diagram.png
 │
 ├── app.py
 ├── train_model.py
@@ -178,71 +269,11 @@ AI-SOC-Platform/
 
 ---
 
-## ⚙️ Installation & Setup
-
-### 1️⃣ Install dependencies
-
-```bash
-pip install pandas numpy scikit-learn flask matplotlib seaborn joblib
-```
-
----
-
-### 2️⃣ Train the model
-
-```bash
-py -3.10 train_model.py
-```
-
----
-
-### 3️⃣ Run the application
-
-```bash
-py -3.10 app.py
-```
-
----
-
-### 4️⃣ Open in browser
-
-```
-http://127.0.0.1:5000/login
-```
-
----
-
-## 🔑 Default Login
-
-```
-Username: admin
-Password: admin123
-```
-
----
-
-## 🗄️ Database
-
-* SQLite (`soc.db`)
-* Stores:
-
-  * Users
-  * Incidents
-  * Analyst updates
-
----
-
 ## 📈 Visualization
 
-Generated using:
-
-* Matplotlib
-* Seaborn
-
-Includes:
-
 * Confusion Matrix
-* Performance Graph
+* Model Performance Graph
+* SOC Report Analytics
 
 ---
 
@@ -259,9 +290,9 @@ Includes:
 ## ⚠️ Design Considerations
 
 * Dataset sampling for performance optimization
-* Threshold tuning for better recall
-* JSON-safe metric handling
-* Feature size consistency (322)
+* Threshold tuning for improved recall
+* JSON-safe metric storage
+* Feature size consistency (322 features)
 
 ---
 
@@ -270,7 +301,23 @@ Includes:
 * Real-time network packet capture
 * Deep learning models (LSTM, Autoencoder)
 * Cloud deployment (AWS / Docker)
-* Live streaming dashboards
+* Live SOC dashboards
 * SIEM integration
+
+---
+
+## 📸 Screenshots
+
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Incidents
+
+![Incidents](screenshots/incidents.png)
+
+### Report
+
+![Report](screenshots/report.png)
 
 ---
