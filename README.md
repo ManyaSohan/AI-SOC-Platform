@@ -256,10 +256,13 @@ AI-SOC-Platform/
 │   └── report.html
 │
 ├── screenshots/
-│   ├── dashboard.png
-│   ├── incidents.png
-│   ├── report.png
-│   └── flow_diagram.png
+│   ├── a.png
+│   ├── b.png
+│   ├── c.png
+│   ├── d.png
+│   ├── e.png
+│   ├── flow_diagram.png
+│   └── design_methodology.png
 │
 ├── app.py
 ├── train_model.py
