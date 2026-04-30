@@ -308,17 +308,18 @@ AI-SOC-Platform/
 
 ## 📸 Screenshots
 
-### 🖥️ Dashboard
-![Dashboard](screenshots/a.png)
-
-### 🚨 Incidents
-![Incidents](screenshots/c.png)
-
-### 📊 Report
-![Report](screenshots/d.png)
 
 ### 🔐 Login Page
+![Dashboard](screenshots/a.png)
+
+### 🖥️ Dashboard
 ![Login](screenshots/b.png)
 
-### ⚙️ Terminal / Model Output
+### 📊 Data / Graph View
+![Graph](screenshots/c.png)
+
+### 🚨 Incidents / Logs
+![Incidents](screenshots/d.png)
+
+### ⚙️ Terminal / Backend Output
 ![Terminal](screenshots/e.png)
