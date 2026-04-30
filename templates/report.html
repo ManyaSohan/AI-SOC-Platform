@@ -1,197 +1,824 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SOC Report</title>
-
+<title>SOC Incident Response Report</title>
 <style>
-body{
-    font-family:Arial;
-    background:#f4f4f4;
-    padding:40px;
-}
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
 
-.container{
-    max-width:1000px;
-    margin:auto;
-    background:white;
-    padding:30px;
-}
+  :root {
+    --bg: #03060f;
+    --panel: #060d1f;
+    --panel2: #080f22;
+    --border: #0f2a4a;
+    --accent: #00d4ff;
+    --text: #c8d8e8;
+    --dim: #4a6278;
+    --high: #ff3c5c;
+    --high-bg: rgba(255,60,92,0.12);
+    --med: #ffb020;
+    --med-bg: rgba(255,176,32,0.10);
+    --low: #00ff9d;
+    --low-bg: rgba(0,255,157,0.07);
+  }
 
-h1,h2,h3{
-    text-align:center;
-    margin:5px;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.section{
-    margin-top:25px;
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-}
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-th,td{
-    border:1px solid #aaa;
-    padding:8px;
-    text-align:center;
-}
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-th{
-    background:#ddd;
-}
+  @keyframes blink {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+  }
 
-.high{color:red;font-weight:bold}
-.medium{color:orange;font-weight:bold}
-.low{color:green;font-weight:bold}
+  @keyframes pulse-border {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
+    50%      { box-shadow: 0 0 14px 4px rgba(0,212,255,0.15); }
+  }
 
-.footer{
-    margin-top:30px;
-    text-align:center;
-}
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: auto;
+    padding: 32px 24px 48px;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 36px 40px 30px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeSlideUp 0.5s ease both;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), #0077ff, var(--accent));
+  }
+
+  .cover-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .cover-logo { display: flex; align-items: center; gap: 14px; }
+
+  .hex-mark {
+    width: 52px; height: 52px;
+    border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    animation: pulse-border 3s ease-in-out infinite;
+  }
+
+  .hex-mark::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    background: rgba(0,212,255,0.12);
+  }
+
+  .hex-mark svg { position: relative; z-index: 1; }
+
+  .org-name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .org-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-top: 3px;
+  }
+
+  .cover-meta {
+    text-align: right;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    line-height: 2;
+  }
+
+  .cover-meta span { color: var(--text); }
+
+  .cover-title {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+
+  .cover-title h1 {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  .cover-title h2 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    font-weight: 400;
+    margin-top: 6px;
+  }
+
+  .cover-bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .prepared-by {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  .prepared-by ul { list-style: none; margin-top: 6px; }
+  .prepared-by ul li { color: var(--text); margin-bottom: 2px; }
+  .prepared-by ul li::before { content: '▸ '; color: var(--accent); }
+
+  .classification-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 5px 14px;
+    border: 1px solid rgba(255,60,92,0.5);
+    color: var(--high);
+    background: var(--high-bg);
+  }
+
+  /* ── Sections ── */
+  .section {
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    overflow: hidden;
+    animation: fadeSlideUp 0.5s ease both;
+  }
+
+  .section:nth-child(2)  { animation-delay: 0.04s; }
+  .section:nth-child(3)  { animation-delay: 0.08s; }
+  .section:nth-child(4)  { animation-delay: 0.12s; }
+  .section:nth-child(5)  { animation-delay: 0.16s; }
+  .section:nth-child(6)  { animation-delay: 0.20s; }
+  .section:nth-child(7)  { animation-delay: 0.24s; }
+  .section:nth-child(8)  { animation-delay: 0.28s; }
+  .section:nth-child(9)  { animation-delay: 0.32s; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: #040a18;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-icon {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+  }
+
+  .section-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .section-body { padding: 20px 18px; }
+
+  /* ── Summary cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .sum-card {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    position: relative;
+  }
+
+  .sum-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .sum-card.s-total::before  { background: var(--accent); }
+  .sum-card.s-high::before   { background: var(--high); }
+  .sum-card.s-medium::before { background: var(--med); }
+  .sum-card.s-low::before    { background: var(--low); }
+
+  .sum-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+
+  .sum-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .sum-card.s-high   .sum-value { color: var(--high); }
+  .sum-card.s-medium .sum-value { color: var(--med); }
+  .sum-card.s-low    .sum-value { color: var(--low); }
+
+  /* ── Insights ── */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .insight-card {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+
+  .insight-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+
+  .insight-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    word-break: break-all;
+  }
+
+  .insight-value .hl { color: var(--accent); }
+
+  /* ── Data table ── */
+  .data-table { width: 100%; border-collapse: collapse; }
+
+  .data-table th {
+    background: #040a18;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .data-table td {
+    padding: 9px 14px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(15,42,74,0.5);
+    vertical-align: middle;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+  .ip-mono {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: #fff;
+  }
+
+  .sev-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border: 1px solid;
+  }
+
+  .sev-badge .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: blink 2s ease infinite;
+  }
+
+  .sev-badge.high   { color: var(--high); border-color: rgba(255,60,92,0.5);  background: var(--high-bg); }
+  .sev-badge.medium { color: var(--med);  border-color: rgba(255,176,32,0.5); background: var(--med-bg); }
+  .sev-badge.low    { color: var(--low);  border-color: rgba(0,255,157,0.4);  background: var(--low-bg); }
+
+  .ts-val { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--dim); }
+
+  /* ── Metrics ── */
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .metric-row:last-child { margin-bottom: 0; }
+
+  .metric-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .metric-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* ── Two-col ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  /* ── Matrix ── */
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .matrix-cell {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .mc-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+
+  .mc-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .mc-tp { color: var(--low); }
+  .mc-tn { color: var(--accent); }
+  .mc-fp { color: var(--med); }
+  .mc-fn { color: var(--high); }
+
+  /* ── Actions ── */
+  .action-list { list-style: none; }
+
+  .action-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(15,42,74,0.5);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .action-list li:last-child { border-bottom: none; }
+
+  .action-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 2px 7px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── Image panel ── */
+  .img-panel {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .img-panel img {
+    max-width: 100%;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Footer ── */
+  .report-footer {
+    margin-top: 32px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: fadeSlideUp 0.5s ease 0.4s both;
+  }
+
+  .footer-left {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    line-height: 2;
+  }
+
+  .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--low);
+    animation: blink 1.5s ease infinite;
+  }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    body::before { display: none; }
+    .page { max-width: 100%; padding: 0; }
+    .cover, .section, .report-footer { border: 1px solid #ccc; background: #fff; }
+    .section-header { background: #f0f0f0; }
+    .sum-card, .insight-card, .metric-row, .matrix-cell, .img-panel { background: #fafafa; border: 1px solid #ccc; }
+    .data-table th { background: #e8e8e8; }
+  }
 </style>
 </head>
-
 <body>
+<div class="page">
 
-<div class="container">
+  <!-- COVER -->
+  <div class="cover">
+    <div class="cover-top">
+      <div class="cover-logo">
+        <div class="hex-mark">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <path d="M13 2L23 7.5V18.5L13 24L3 18.5V7.5L13 2Z" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+            <path d="M13 7L19 10.5V17.5L13 21L7 17.5V10.5L13 7Z" fill="rgba(0,212,255,0.2)"/>
+            <circle cx="13" cy="14" r="3" fill="#00d4ff" opacity="0.6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="org-name">CyberSecurity AI SOC Platform</div>
+          <div class="org-sub">THREAT INTELLIGENCE · ACTIVE DEFENSE · AI-DRIVEN</div>
+        </div>
+      </div>
+      <div class="cover-meta">
+        REPORT ID: <span>{{ report_id }}</span><br>
+        ENVIRONMENT: <span>DEMO SOC LAB</span><br>
+        GENERATED: <span>{{ time }}</span>
+      </div>
+    </div>
+    <div class="cover-title">
+      <h1>Incident Response Report</h1>
+      <h2>// SECURITY OPERATIONS CENTER · CLASSIFIED ANALYSIS</h2>
+    </div>
+    <div class="cover-bottom">
+      <div class="prepared-by">
+        <div class="sum-label">PREPARED BY</div>
+        <ul>
+          {% for person in name.split(",") %}
+          <li>{{ person.strip() }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="classification-badge">⚠ RESTRICTED · INTERNAL USE ONLY</div>
+    </div>
+  </div>
 
-<h1>CyberSecurity AI SOC Platform</h1>
-<h2>Incident Response Report</h2>
+  <!-- 01 EXECUTIVE SUMMARY -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">01</span>
+      <span class="section-title">Executive Summary</span>
+    </div>
+    <div class="section-body">
+      <div class="summary-grid">
+        <div class="sum-card s-total">
+          <div class="sum-label">Total Alerts</div>
+          <div class="sum-value">{{ total }}</div>
+        </div>
+        <div class="sum-card s-high">
+          <div class="sum-label">High Severity</div>
+          <div class="sum-value">{{ high }}</div>
+        </div>
+        <div class="sum-card s-medium">
+          <div class="sum-label">Medium Severity</div>
+          <div class="sum-value">{{ medium }}</div>
+        </div>
+        <div class="sum-card s-low">
+          <div class="sum-label">Low Severity</div>
+          <div class="sum-value">{{ low }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<h3>Prepared By:</h3>
-<ul>
-{% for person in name.split(",") %}
-<li>{{ person.strip() }}</li>
-{% endfor %}
-</ul>
+  <!-- 02 EXECUTIVE INSIGHTS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">02</span>
+      <span class="section-title">Executive Insights</span>
+    </div>
+    <div class="section-body">
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="insight-label">TOP ATTACK VECTOR</div>
+          <div class="insight-value"><span class="hl">▸</span> {{ top_attack }}</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-label">HIGHEST RISK IP</div>
+          <div class="insight-value">
+            <span class="hl">▸</span> {{ top_ip }}
+            <small style="color:var(--high);font-family:'Share Tech Mono',monospace;font-size:12px">&nbsp;[RISK {{ top_risk }}]</small>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-label">PEAK ACTIVITY TIME</div>
+          <div class="insight-value"><span class="hl">▸</span> {{ peak_time }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<h3>Environment: Demo SOC Lab</h3>
-<h3>Report ID: {{ report_id }}</h3>
+  <!-- 03 INCIDENT TABLE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">03</span>
+      <span class="section-title">Incident Table</span>
+    </div>
+    <div class="section-body" style="padding:0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Source IP</th>
+            <th>Attack Type</th>
+            <th>Severity</th>
+            <th>Risk Score</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in data %}
+          <tr>
+            <td class="ip-mono">{{ row[1] }}</td>
+            <td style="font-weight:600">{{ row[2] }}</td>
+            <td>
+              {% if row[3] >= 70 %}
+                <span class="sev-badge high"><span class="dot"></span>HIGH</span>
+              {% elif row[3] >= 40 %}
+                <span class="sev-badge medium"><span class="dot"></span>MEDIUM</span>
+              {% else %}
+                <span class="sev-badge low"><span class="dot"></span>LOW</span>
+              {% endif %}
+            </td>
+            <td style="font-family:'Share Tech Mono',monospace;color:{% if row[3] >= 70 %}var(--high){% elif row[3] >= 40 %}var(--med){% else %}var(--low){% endif %}">
+              {{ row[3] }}
+            </td>
+            <td class="ts-val">{{ row[5] if row|length > 5 else "N/A" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-<p style="text-align:center;">Generated: {{ time }}</p>
+  <!-- 04 RECOMMENDED ACTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">04</span>
+      <span class="section-title">Recommended Actions</span>
+    </div>
+    <div class="section-body">
+      <ul class="action-list">
+        <li><span class="action-num">P1</span> Block highest risk IP immediately via firewall rule</li>
+        <li><span class="action-num">P2</span> Enable WAF rules to mitigate SQL Injection vectors</li>
+        <li><span class="action-num">P3</span> Increase firewall sensitivity for PortScan activity</li>
+        <li><span class="action-num">P4</span> Monitor brute-force attempts for the next 24 hours</li>
+        <li><span class="action-num">P5</span> Review all SOC alerts at 30-minute intervals</li>
+      </ul>
+    </div>
+  </div>
 
-<!-- ================= EXECUTIVE SUMMARY ================= -->
-<div class="section">
-<h3>Executive Summary</h3>
-<p>Total Alerts: {{ total }}</p>
-<p>High Severity: {{ high }}</p>
-<p>Medium Severity: {{ medium }}</p>
-<p>Low Severity: {{ low }}</p>
+  <!-- 05 MODEL PERFORMANCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">05</span>
+      <span class="section-title">Model Performance</span>
+    </div>
+    <div class="section-body">
+      <div class="two-col">
+        <div>
+          <div class="metric-row">
+            <span class="metric-label">Accuracy</span>
+            <span class="metric-value">{{ "%.2f"|format(accuracy) }}</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Precision</span>
+            <span class="metric-value">{{ "%.2f"|format(precision) }}</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Recall</span>
+            <span class="metric-value">{{ "%.2f"|format(recall) }}</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">F1 Score</span>
+            <span class="metric-value">{{ "%.2f"|format(f1) }}</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">False Positive Rate</span>
+            <span class="metric-value" style="color:var(--med)">{{ "%.3f"|format(fpr) }}</span>
+          </div>
+        </div>
+        <div class="img-panel">
+          <div class="sum-label" style="margin-bottom:12px">PERFORMANCE CHART</div>
+          <img src="/static/performance.png" alt="Model Performance Chart">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 DATASET INFO -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">06</span>
+      <span class="section-title">Dataset Information</span>
+    </div>
+    <div class="section-body">
+      <div class="two-col">
+        <div class="metric-row">
+          <span class="metric-label">Total Dataset Size</span>
+          <span class="metric-value">{{ dataset_total }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Used for Training</span>
+          <span class="metric-value">{{ dataset_used }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 CLASSIFICATION REPORT -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">07</span>
+      <span class="section-title">Classification Report</span>
+    </div>
+    <div class="section-body" style="padding:0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1 Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for key, value in report_data.items() if key in ['0','1'] %}
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">CLASS {{ key }}</td>
+            <td style="font-family:'Share Tech Mono',monospace">{{ "%.2f"|format(value.precision) }}</td>
+            <td style="font-family:'Share Tech Mono',monospace">{{ "%.2f"|format(value.recall) }}</td>
+            <td style="font-family:'Share Tech Mono',monospace">{{ "%.2f"|format(value['f1-score']) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 08 CONFUSION MATRIX -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">08</span>
+      <span class="section-title">Confusion Matrix &amp; Detection Metrics</span>
+    </div>
+    <div class="section-body">
+      <div class="two-col">
+        <div>
+          <div class="sum-label" style="margin-bottom:10px">DETECTION BREAKDOWN</div>
+          <div class="matrix-grid">
+            <div class="matrix-cell">
+              <div class="mc-label">TRUE POSITIVES</div>
+              <div class="mc-value mc-tp">{{ tp }}</div>
+            </div>
+            <div class="matrix-cell">
+              <div class="mc-label">TRUE NEGATIVES</div>
+              <div class="mc-value mc-tn">{{ tn }}</div>
+            </div>
+            <div class="matrix-cell">
+              <div class="mc-label">FALSE POSITIVES</div>
+              <div class="mc-value mc-fp">{{ fp }}</div>
+            </div>
+            <div class="matrix-cell">
+              <div class="mc-label">FALSE NEGATIVES</div>
+              <div class="mc-value mc-fn">{{ fn }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="img-panel">
+          <div class="sum-label" style="margin-bottom:12px">CONFUSION MATRIX</div>
+          <img src="/static/confusion_matrix.png" alt="Confusion Matrix">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="report-footer">
+    <div class="footer-left">
+      GENERATED BY CYBERSECURITY AI SOC ENGINE<br>
+      © 2026 CYBERSECURITY AI SOC · ALL RIGHTS RESERVED
+    </div>
+    <div class="footer-right">
+      <div class="live-dot"></div>
+      AUTO-GENERATED · REPORT ID: {{ report_id }}
+    </div>
+  </div>
+
 </div>
-
-<!-- ================= INSIGHTS ================= -->
-<div class="section">
-<h3>Executive Insights</h3>
-<p>Top Attack Vector: {{ top_attack }}</p>
-<p>Highest Risk IP: {{ top_ip }} (Risk {{ top_risk }})</p>
-<p>Peak Activity Time: {{ peak_time }}</p>
-</div>
-
-<!-- ================= INCIDENT TABLE ================= -->
-<div class="section">
-<h3>Incident Table</h3>
-
-<table>
-<tr>
-<th>IP Address</th>
-<th>Attack Type</th>
-<th>Severity</th>
-<th>Risk</th>
-<th>Timestamp</th>
-</tr>
-
-{% for row in data %}
-<tr>
-<td>{{ row[1] }}</td>
-<td>{{ row[2] }}</td>
-
-<td class="
-{% if row[3] >= 70 %}high
-{% elif row[3] >= 40 %}medium
-{% else %}low
-{% endif %}
-">
-{% if row[3] >= 70 %}High
-{% elif row[3] >= 40 %}Medium
-{% else %}Low
-{% endif %}
-</td>
-
-<td>{{ row[3] }}</td>
-<td>{{ row[5] if row|length > 5 else "N/A" }}</td>
-</tr>
-{% endfor %}
-
-</table>
-</div>
-
-<!-- ================= RECOMMENDED ACTIONS ================= -->
-<div class="section">
-<h3>Recommended Actions</h3>
-<ul>
-<li>Block highest risk IP immediately</li>
-<li>Enable WAF rules for SQL Injection</li>
-<li>Increase firewall sensitivity for PortScan</li>
-<li>Monitor brute-force attempts for next 24 hours</li>
-<li>Review SOC alerts every 30 minutes</li>
-</ul>
-</div>
-
-<!-- ================= MODEL PERFORMANCE ================= -->
-<div class="section">
-<h3>Model Performance</h3>
-<p><b>Accuracy:</b> {{ "%.2f"|format(accuracy) }}</p>
-<p><b>Precision:</b> {{ "%.2f"|format(precision) }}</p>
-
-<img src="/static/performance.png" width="400">
-</div>
-
-<!-- ================= DATASET INFO ================= -->
-<div class="section">
-<h3>Dataset Information</h3>
-<p>Total Dataset Size: {{ dataset_total }}</p>
-<p>Used for Training: {{ dataset_used }}</p>
-</div>
-
-<!-- ================= CLASSIFICATION REPORT ================= -->
-<div class="section">
-<h3>Classification Report</h3>
-
-<table>
-<tr>
-<th>Class</th>
-<th>Precision</th>
-<th>Recall</th>
-<th>F1 Score</th>
-</tr>
-
-{% for key, value in report_data.items() if key in ['0','1'] %}
-<tr>
-<td>{{ key }}</td>
-<td>{{ "%.2f"|format(value.precision) }}</td>
-<td>{{ "%.2f"|format(value.recall) }}</td>
-<td>{{ "%.2f"|format(value['f1-score']) }}</td>
-</tr>
-{% endfor %}
-
-</table>
-</div>
-
-<!-- ================= CONFUSION MATRIX ================= -->
-<div class="section">
-<h3>Confusion Matrix</h3>
-<img src="/static/confusion_matrix.png" width="400">
-</div>
-
-<!-- ================= FOOTER ================= -->
-<div class="footer">
-<p>Generated by CyberSecurity AI SOC Engine</p>
-<p>© 2026 CyberSecurity AI SOC</p>
-</div>
-
-</div>
-
 </body>
 </html>
