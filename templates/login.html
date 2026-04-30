@@ -1,81 +1,476 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>SOC Login</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOC Login — AI Security Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{
-margin:0;
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-background:radial-gradient(circle at top,#0b1220,#020617);
-font-family:Arial;
-color:white;
-}
+  :root {
+    --cyan: #00e5ff;
+    --cyan-dim: rgba(0, 229, 255, 0.15);
+    --cyan-glow: rgba(0, 229, 255, 0.4);
+    --green: #00ff88;
+    --red: #ff3d57;
+    --bg: #020b14;
+    --panel: rgba(4, 20, 38, 0.92);
+    --border: rgba(0, 229, 255, 0.25);
+    --text: #c8dce8;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
+  }
 
-.card{
-background:rgba(15,23,42,.9);
-padding:40px;
-border-radius:14px;
-box-shadow:0 0 40px #0ea5e955;
-text-align:center;
-width:320px;
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-h2{margin-bottom:20px;color:#38bdf8}
+  body {
+    min-height: 100vh;
+    background: var(--bg) url("/static/bg.png") no-repeat center center / cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--sans);
+    color: var(--text);
+    overflow: hidden;
+    position: relative;
+  }
 
-input{
-width:100%;
-padding:10px;
-margin:10px 0;
-background:#020617;
-color:white;
-border:1px solid #38bdf8;
-border-radius:6px;
-}
+  /* ── Animated grid overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridDrift 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-button{
-width:100%;
-padding:10px;
-background:#38bdf8;
-border:none;
-border-radius:6px;
-cursor:pointer;
-font-weight:bold;
-}
+  /* ── Dark overlay for bg image ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(2,11,20,0.88) 0%, rgba(2,11,20,0.75) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-button:hover{
-background:#22c55e;
-}
+  @keyframes gridDrift {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+  }
 
-.footer{
-margin-top:15px;
-font-size:12px;
-color:#64748b;
-}
+  /* ── Ambient orbs ── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+    animation: orbFloat 8s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 400px; height: 400px; background: #00e5ff; top: -100px; left: -100px; animation-delay: 0s; }
+  .orb-2 { width: 300px; height: 300px; background: #00ff88; bottom: -80px; right: -60px; animation-delay: 3s; }
+  .orb-3 { width: 200px; height: 200px; background: #0057ff; top: 50%; left: 60%; animation-delay: 6s; }
+
+  @keyframes orbFloat {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(20px, 30px) scale(1.08); }
+  }
+
+  /* ── Card ── */
+  .card {
+    position: relative;
+    z-index: 2;
+    width: 400px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 48px 40px 40px;
+    backdrop-filter: blur(20px);
+    box-shadow:
+      0 0 0 1px rgba(0,229,255,0.08) inset,
+      0 40px 80px rgba(0,0,0,0.6),
+      0 0 60px rgba(0,229,255,0.06);
+    animation: cardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Corner accents */
+  .card::before, .card::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--cyan);
+    border-style: solid;
+  }
+  .card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .card::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  /* ── Status bar ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 36px;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .status-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .status-id {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(0,229,255,0.4);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Logo / Title ── */
+  .brand {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .brand-icon {
+    width: 56px; height: 56px;
+    margin: 0 auto 16px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand-icon svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 12px var(--cyan-glow));
+  }
+  .brand-title {
+    font-family: var(--sans);
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+  .brand-title span { color: var(--cyan); }
+  .brand-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(0,229,255,0.5);
+    letter-spacing: 0.2em;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border));
+  }
+  .divider::after { background: linear-gradient(90deg, var(--border), transparent); }
+  .divider-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(0,229,255,0.35);
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+  }
+
+  /* ── Form ── */
+  .field {
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .field-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(0,229,255,0.6);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .field-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .field-icon {
+    position: absolute;
+    left: 14px;
+    color: rgba(0,229,255,0.4);
+    pointer-events: none;
+    transition: color 0.3s;
+    display: flex;
+  }
+  .field-wrap:focus-within .field-icon { color: var(--cyan); }
+
+  input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    background: rgba(0,229,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    outline: none;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    -webkit-appearance: none;
+  }
+  input::placeholder { color: rgba(0,229,255,0.2); }
+  input:focus {
+    border-color: var(--cyan);
+    background: rgba(0,229,255,0.07);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.08), 0 0 20px rgba(0,229,255,0.06);
+  }
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #030f1e inset;
+    -webkit-text-fill-color: #fff;
+  }
+
+  /* ── Scan line on focused input ── */
+  .field-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    bottom: -1px;
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+    border-radius: 0 0 3px 3px;
+  }
+  .field-wrap:focus-within::after { transform: scaleX(1); }
+
+  /* ── Button ── */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    background: linear-gradient(90deg, rgba(0,229,255,0.15), rgba(0,229,255,0.08));
+    border: 1px solid var(--cyan);
+    border-radius: 3px;
+    color: var(--cyan);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.15) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+  .btn:hover {
+    background: linear-gradient(90deg, rgba(0,229,255,0.25), rgba(0,229,255,0.15));
+    box-shadow: 0 0 30px rgba(0,229,255,0.2), 0 0 60px rgba(0,229,255,0.08);
+    color: #fff;
+  }
+  .btn:hover::before { transform: translateX(100%); }
+  .btn:active { transform: scale(0.99); }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0,229,255,0.1);
+  }
+  .footer-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(0,229,255,0.35);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .footer-badge svg { opacity: 0.5; }
+  .footer-version {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(0,229,255,0.2);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Scanline effect ── */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.04) 3px,
+      rgba(0,0,0,0.04) 4px
+    );
+  }
+
+  /* Particle dots */
+  .particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--cyan);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particleDrift linear infinite;
+  }
+  @keyframes particleDrift {
+    0%   { opacity: 0; transform: translateY(0) translateX(0); }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(-100vh) translateX(20px); }
+  }
 </style>
 </head>
-
 <body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="scanlines"></div>
+<div class="particles" id="particles"></div>
 
 <div class="card">
 
-<h2>🔐 AI SOC Login</h2>
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span class="status-text">Systems Nominal</span>
+    <span class="status-id">NODE-07 / TL-3</span>
+  </div>
 
-<form method="post">
-<input name="username" placeholder="Username" required>
-<input type="password" name="password" placeholder="Password" required>
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="28,4 52,16 52,40 28,52 4,40 4,16" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linejoin="round"/>
+        <polygon points="28,12 44,20 44,36 28,44 12,36 12,20" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="1" stroke-linejoin="round"/>
+        <circle cx="28" cy="28" r="6" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+        <circle cx="28" cy="28" r="2.5" fill="#00e5ff"/>
+        <line x1="28" y1="12" x2="28" y2="22" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+        <line x1="28" y1="34" x2="28" y2="44" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+        <line x1="12" y1="20" x2="22" y2="25" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+        <line x1="34" y1="31" x2="44" y2="36" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+        <line x1="44" y1="20" x2="34" y2="25" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+        <line x1="22" y1="31" x2="12" y2="36" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+      </svg>
+    </div>
+    <div class="brand-title">AI <span>SOC</span></div>
+    <div class="brand-sub">Security Operations Center</div>
+  </div>
 
-<button>Login</button>
-</form>
+  <div class="divider"><span class="divider-text">Authenticate Access</span></div>
 
-<div class="footer">
-AI Powered SOC Platform
+  <form method="post">
+    <div class="field">
+      <label class="field-label" for="username">Operator ID</label>
+      <div class="field-wrap">
+        <span class="field-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </span>
+        <input id="username" name="username" placeholder="Enter your ID" autocomplete="username" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="password">Access Key</label>
+      <div class="field-wrap">
+        <span class="field-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </span>
+        <input id="password" type="password" name="password" placeholder="••••••••••••" autocomplete="current-password" required>
+      </div>
+    </div>
+
+    <button class="btn" type="submit">Authenticate</button>
+  </form>
+
+  <div class="footer">
+    <div class="footer-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span>Encrypted Channel</span>
+    </div>
+    <span class="footer-version">v3.4.1</span>
+  </div>
+
 </div>
 
-</div>
-
+<script>
+  // Generate floating particles
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      top: ${Math.random() * 100 + 100}%;
+      animation-duration: ${8 + Math.random() * 14}s;
+      animation-delay: ${Math.random() * 12}s;
+      opacity: 0;
+      width: ${Math.random() > 0.7 ? 3 : 2}px;
+      height: ${Math.random() > 0.7 ? 3 : 2}px;
+    `;
+    container.appendChild(p);
+  }
+</script>
 </body>
 </html>
