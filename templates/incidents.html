@@ -2,93 +2,704 @@
 <html>
 <head>
 <title>SOC Incident Management</title>
-
 <style>
-body{background:#020617;color:white;font-family:Arial}
-h2{text-align:center}
-table{width:98%;margin:auto;border-collapse:collapse}
-th,td{border:1px solid #334155;padding:6px;text-align:center}
-th{background:#020617;color:#38bdf8;position:sticky;top:0}
-.open{background:#7f1d1d}
-.closed{background:#022c22}
-input{background:#020617;color:white;border:1px solid #38bdf8;padding:4px}
-textarea{background:#020617;color:white;border:1px solid #38bdf8}
-button{background:#22c55e;border:none;padding:4px 8px;cursor:pointer}
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #03060f;
+    --panel: #060d1f;
+    --border: #0f2a4a;
+    --accent: #00d4ff;
+    --accent-glow: rgba(0,212,255,0.15);
+    --text: #c8d8e8;
+    --dim: #4a6278;
+    --open: #ff3c5c;
+    --open-bg: rgba(255,60,92,0.10);
+    --closed: #00ff9d;
+    --closed-bg: rgba(0,255,157,0.07);
+    --green: #22c55e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%; left: 0; right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 50%, rgba(0,212,255,0.012) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 0;
+    animation: scanlines 10s linear infinite;
+  }
+
+  @keyframes scanlines {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
+    50%       { box-shadow: 0 0 12px 4px rgba(0,212,255,0.15); }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  /* ── Layout ── */
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    max-width: 1500px;
+    margin: auto;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    animation: fadeSlideUp 0.4s ease both;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .logo-mark {
+    width: 42px; height: 42px;
+    border: 2px solid var(--open);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    animation: pulse-border 3s ease-in-out infinite;
+  }
+
+  .logo-mark::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: rgba(255,60,92,0.15);
+  }
+
+  .logo-mark svg { position: relative; z-index: 1; }
+
+  .title-block h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .title-block p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--open);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  .back-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--accent);
+    padding: 8px 16px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .back-btn:hover {
+    background: rgba(0,212,255,0.1);
+    box-shadow: 0 0 20px rgba(0,212,255,0.2);
+  }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeSlideUp 0.5s ease both;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.10s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.20s; }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.s-total::before  { background: var(--accent); }
+  .stat-card.s-open::before   { background: var(--open); }
+  .stat-card.s-closed::before { background: var(--closed); }
+  .stat-card.s-assign::before { background: #a78bfa; }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .stat-card.s-open   .stat-value { color: var(--open); }
+  .stat-card.s-closed .stat-value { color: var(--closed); }
+  .stat-card.s-assign .stat-value { color: #a78bfa; }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    animation: fadeSlideUp 0.5s ease 0.2s both;
+  }
+
+  .search-wrap { position: relative; max-width: 280px; flex: 1; }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 9px 12px 9px 36px;
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-input::placeholder { color: var(--dim); }
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,212,255,0.15);
+  }
+
+  .filter-btns { display: flex; gap: 6px; }
+
+  .filter-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover { color: var(--text); border-color: var(--accent); }
+  .filter-btn.f-all    { color: var(--accent); border-color: var(--accent); background: rgba(0,212,255,0.08); }
+  .filter-btn.f-open   { color: var(--open);   border-color: var(--open);   background: var(--open-bg); }
+  .filter-btn.f-closed { color: var(--closed); border-color: var(--closed); background: var(--closed-bg); }
+
+  .res-count {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  /* ── Table ── */
+  .table-wrap {
+    border: 1px solid var(--border);
+    overflow: auto;
+    max-height: 560px;
+    background: var(--panel);
+    animation: fadeSlideUp 0.5s ease 0.28s both;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead { position: sticky; top: 0; z-index: 5; }
+
+  th {
+    background: #040a18;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    font-weight: 400;
+  }
+
+  th:first-child { color: var(--dim); }
+
+  td {
+    padding: 10px 14px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(15,42,74,0.5);
+    vertical-align: middle;
+  }
+
+  tr.row-open   td { background: rgba(255,60,92,0.07); }
+  tr.row-closed td { background: rgba(0,255,157,0.04); }
+  tr:hover td { filter: brightness(1.15); }
+
+  .id-cell {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .ip-cell {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  .attack-cell { font-weight: 600; white-space: nowrap; }
+
+  .risk-cell {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  .status-badge.open   { color: var(--open);   border-color: rgba(255,60,92,0.5);  background: var(--open-bg); }
+  .status-badge.closed { color: var(--closed); border-color: rgba(0,255,157,0.4); background: var(--closed-bg); }
+
+  .status-badge .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: blink 2s ease infinite;
+  }
+
+  .status-badge.closed .dot { animation: none; opacity: 0.6; }
+
+  /* Inline inputs */
+  .analyst-input {
+    background: rgba(0,212,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    padding: 5px 8px;
+    width: 130px;
+    outline: none;
+    letter-spacing: 1px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .analyst-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(0,212,255,0.15);
+  }
+
+  .comment-input {
+    background: rgba(0,212,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    padding: 5px 8px;
+    width: 200px;
+    min-height: 36px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .comment-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(0,212,255,0.15);
+  }
+
+  /* Action button */
+  .close-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    background: rgba(255,60,92,0.12);
+    border: 1px solid rgba(255,60,92,0.5);
+    color: var(--open);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .close-btn:hover {
+    background: rgba(255,60,92,0.25);
+    box-shadow: 0 0 12px rgba(255,60,92,0.2);
+  }
+
+  .view-only {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  .done-mark {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--closed);
+    letter-spacing: 1px;
+  }
+
+  /* Scrollbar */
+  .table-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+  .table-wrap::-webkit-scrollbar-track { background: var(--bg); }
+  .table-wrap::-webkit-scrollbar-thumb { background: var(--border); }
+  .table-wrap::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* Empty row */
+  .empty-row td {
+    text-align: center;
+    padding: 48px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--dim);
+    letter-spacing: 2px;
+    font-size: 13px;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 10px 18px;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+  }
+
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* Footer */
+  .footer {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--open);
+    animation: blink 1.5s ease infinite;
+    flex-shrink: 0;
+  }
 </style>
 </head>
-
 <body>
+<div class="wrapper">
 
-<h2>🚨 SOC Incident Management</h2>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L18 6V14L10 18L2 14V6L10 2Z" stroke="#ff3c5c" stroke-width="1.5" fill="none"/>
+          <path d="M7 10L9 12L13 8" stroke="#ff3c5c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="title-block">
+        <h1>Incident Management</h1>
+        <p>SOC · ACTIVE RESPONSE · TRIAGE CENTER</p>
+      </div>
+    </div>
+    <button class="back-btn" onclick="location.href='/'">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M8 2L3 7L8 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      DASHBOARD
+    </button>
+  </div>
 
-<button onclick="location.href='/'">Dashboard</button>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card s-total">
+      <div class="stat-label">Total Incidents</div>
+      <div class="stat-value" id="cnt-total">—</div>
+    </div>
+    <div class="stat-card s-open">
+      <div class="stat-label">Open</div>
+      <div class="stat-value" id="cnt-open">—</div>
+    </div>
+    <div class="stat-card s-closed">
+      <div class="stat-label">Closed</div>
+      <div class="stat-value" id="cnt-closed">—</div>
+    </div>
+    <div class="stat-card s-assign">
+      <div class="stat-label">Assigned</div>
+      <div class="stat-value" id="cnt-assign">—</div>
+    </div>
+  </div>
 
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>IP</th>
-<th>Attack</th>
-<th>Risk</th>
-<th>Status</th>
-<th>Analyst</th>
-<th>Comment</th>
-<th>Action</th>
-</tr>
-</thead>
+  <!-- Controls -->
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="#4a6278" stroke-width="1.2"/>
+        <path d="M9.5 9.5L12.5 12.5" stroke="#4a6278" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <input class="search-input" id="ipSearch" placeholder="SEARCH IP / ATTACK..." onkeyup="applyFilter()">
+    </div>
+    <div class="filter-btns">
+      <button class="filter-btn f-all"  onclick="setStatus('', this)">ALL</button>
+      <button class="filter-btn"        onclick="setStatus('Open', this)">OPEN</button>
+      <button class="filter-btn"        onclick="setStatus('Closed', this)">CLOSED</button>
+    </div>
+    <div class="res-count" id="res-count">— INCIDENTS</div>
+  </div>
 
-<tbody id="inc"></tbody>
-</table>
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Source IP</th>
+          <th>Attack Type</th>
+          <th>Risk Score</th>
+          <th>Status</th>
+          <th>Analyst</th>
+          <th>Comment</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="inc">
+        <tr class="empty-row"><td colspan="8">[ LOADING INCIDENTS... ]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="live-dot"></div>
+    INCIDENT TRACKER · SOC OPERATIONS · CLASSIFICATION: RESTRICTED
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
 
 <script>
+  let allRows = [];
+  let currentStatus = '';
+  let activeFilterBtn = document.querySelector('.filter-btn.f-all');
 
-fetch("/api/incidents")
-.then(r=>r.json())
-.then(d=>{
-let h="";
-d.forEach(i=>{
-let c=i[4]=="Closed"?"closed":"open";
-h+=`<tr class="${c}">
-<td>${i[0]}</td>
-<td>${i[1]}</td>
-<td>${i[2]}</td>
-<td>${i[3]}</td>
-<td>${i[4]}</td>
+  const incTbody = document.getElementById('inc');
 
-<td>
-<input value="${i[6]||''}" onchange="update(${i[0]},this.value,null)">
-</td>
+  /* ── Jinja role placeholder (rendered server-side) ── */
+  const IS_ADMIN = "{{ role }}" === "admin";
 
-<td>
-<textarea onchange="update(${i[0]},null,this.value)">${i[7]||''}</textarea>
-</td>
+  fetch("/api/incidents")
+    .then(r => r.json())
+    .then(data => {
+      allRows = data;
+      updateStats(data);
+      render(applyFilters());
+    })
+    .catch(err => {
+      console.error(err);
+      incTbody.innerHTML = "<tr class='empty-row'><td colspan='8'>[ FAILED TO LOAD INCIDENTS ]</td></tr>";
+    });
 
-<td>
-{% if role=="admin" %}
-${i[4]=="Open"?`<button onclick="closeInc(${i[0]})">Close</button>`:"✓"}
-{% else %}
-View Only
-{% endif %}
-</td>
+  function updateStats(data) {
+    const open   = data.filter(r => r[4] === 'Open').length;
+    const closed = data.filter(r => r[4] === 'Closed').length;
+    const assign = data.filter(r => r[6] && r[6].trim() !== '').length;
+    document.getElementById('cnt-total').textContent  = String(data.length).padStart(2, '0');
+    document.getElementById('cnt-open').textContent   = String(open).padStart(2, '0');
+    document.getElementById('cnt-closed').textContent = String(closed).padStart(2, '0');
+    document.getElementById('cnt-assign').textContent = String(assign).padStart(2, '0');
+  }
 
+  function applyFilters() {
+    const q = document.getElementById('ipSearch').value.toLowerCase();
+    return allRows.filter(r => {
+      const matchQ = !q || r[1].toLowerCase().includes(q) || r[2].toLowerCase().includes(q);
+      const matchS = !currentStatus || r[4] === currentStatus;
+      return matchQ && matchS;
+    });
+  }
 
-</tr>`;
-});
-inc.innerHTML=h;
-});
+  function render(data) {
+    document.getElementById('res-count').textContent = data.length + ' INCIDENTS';
+    if (!data.length) {
+      incTbody.innerHTML = "<tr class='empty-row'><td colspan='8'>[ NO MATCHING INCIDENTS ]</td></tr>";
+      return;
+    }
+    incTbody.innerHTML = data.map((i, idx) => {
+      const isOpen    = i[4] === 'Open';
+      const rowClass  = isOpen ? 'row-open' : 'row-closed';
+      const sevClass  = isOpen ? 'open' : 'closed';
+      const risk      = i[3];
+      const riskColor = risk >= 80 ? 'var(--open)' : risk >= 50 ? '#ffb020' : 'var(--closed)';
 
-function closeInc(id){
-fetch("/close_incident/"+id).then(()=>location.reload());
-}
+      const actionCell = IS_ADMIN
+        ? (isOpen
+            ? `<button class="close-btn" onclick="closeInc(${i[0]})">⬛ CLOSE</button>`
+            : `<span class="done-mark">✓ RESOLVED</span>`)
+        : `<span class="view-only">VIEW ONLY</span>`;
 
-function update(id,a,c){
-let f=new FormData();
-if(a!==null)f.append("analyst",a);
-if(c!==null)f.append("comment",c);
+      return `
+        <tr class="${rowClass}" style="animation: fadeSlideUp 0.3s ease ${idx * 0.03}s both">
+          <td class="id-cell">${String(i[0]).padStart(4, '0')}</td>
+          <td class="ip-cell">${i[1]}</td>
+          <td class="attack-cell">${i[2]}</td>
+          <td class="risk-cell" style="color:${riskColor}">${risk}</td>
+          <td><span class="status-badge ${sevClass}"><span class="dot"></span>${i[4].toUpperCase()}</span></td>
+          <td>
+            <input class="analyst-input"
+              value="${i[6] || ''}"
+              placeholder="ASSIGN ANALYST"
+              onchange="updateInc(${i[0]}, this.value, null)">
+          </td>
+          <td>
+            <textarea class="comment-input"
+              placeholder="Add notes..."
+              onchange="updateInc(${i[0]}, null, this.value)">${i[7] || ''}</textarea>
+          </td>
+          <td>${actionCell}</td>
+        </tr>`;
+    }).join('');
+  }
 
-fetch("/update_incident/"+id,{method:"POST",body:f});
-}
+  function applyFilter() { render(applyFilters()); }
+
+  function setStatus(v, btn) {
+    currentStatus = v;
+    if (activeFilterBtn) activeFilterBtn.className = 'filter-btn';
+    const cls = v === 'Open' ? 'f-open' : v === 'Closed' ? 'f-closed' : 'f-all';
+    btn.className = `filter-btn ${cls}`;
+    activeFilterBtn = btn;
+    render(applyFilters());
+  }
+
+  function closeInc(id) {
+    fetch("/close_incident/" + id)
+      .then(() => {
+        showToast('INCIDENT #' + String(id).padStart(4,'0') + ' CLOSED');
+        setTimeout(() => location.reload(), 1000);
+      })
+      .catch(() => showToast('ERROR CLOSING INCIDENT', true));
+  }
+
+  function updateInc(id, analyst, comment) {
+    const f = new FormData();
+    if (analyst !== null) f.append("analyst", analyst);
+    if (comment !== null) f.append("comment", comment);
+    fetch("/update_incident/" + id, { method: "POST", body: f })
+      .then(() => showToast('INCIDENT #' + String(id).padStart(4,'0') + ' UPDATED'))
+      .catch(() => showToast('UPDATE FAILED', true));
+  }
+
+  function showToast(msg, err = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = err ? 'var(--open)' : 'var(--accent)';
+    t.style.color = err ? 'var(--open)' : 'var(--accent)';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
 </script>
-
 </body>
 </html>
