@@ -1,129 +1,575 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SOC History</title>
-
+<title>SOC Attack History</title>
 <style>
-body{
-background:#020617;
-color:white;
-font-family:Arial;
-}
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
 
-input, select{
-padding:6px;
-margin:6px;
-background:#020617;
-color:white;
-border:1px solid #38bdf8;
-}
+  :root {
+    --bg: #03060f;
+    --panel: #060d1f;
+    --border: #0f2a4a;
+    --accent: #00d4ff;
+    --accent2: #ff3c5c;
+    --accent3: #00ff9d;
+    --text: #c8d8e8;
+    --dim: #4a6278;
+    --high: #ff3c5c;
+    --high-bg: rgba(255,60,92,0.12);
+    --med: #ffb020;
+    --med-bg: rgba(255,176,32,0.10);
+    --low: #00ff9d;
+    --low-bg: rgba(0,255,157,0.07);
+  }
 
-table{
-width:98%;
-border-collapse:collapse;
-margin:auto;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-th,td{
-border:1px solid #334155;
-padding:6px;
-text-align:center;
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-th{
-background:#020617;
-color:#38bdf8;
-position:sticky;
-top:0;
-}
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-.high{background:#7f1d1d}
-.medium{background:#78350f}
-.low{background:#022c22}
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 50%, rgba(0,212,255,0.015) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 0;
+    animation: scanlines 8s linear infinite;
+  }
+
+  @keyframes scanlines {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    max-width: 1400px;
+    margin: auto;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-mark {
+    width: 42px;
+    height: 42px;
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: pulse-border 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
+    50% { box-shadow: 0 0 12px 4px rgba(0,212,255,0.15); }
+  }
+
+  .logo-mark::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: rgba(0,212,255,0.15);
+    animation: pulse-inner 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-inner {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .logo-mark svg { position: relative; z-index: 1; }
+
+  .title-block h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .title-block p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  .back-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--accent);
+    padding: 8px 16px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .back-btn:hover {
+    background: rgba(0,212,255,0.1);
+    box-shadow: 0 0 20px rgba(0,212,255,0.2);
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeSlideUp 0.5s ease both;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.total::before  { background: var(--accent); }
+  .stat-card.high-card::before { background: var(--high); }
+  .stat-card.med-card::before  { background: var(--med); }
+  .stat-card.low-card::before  { background: var(--low); }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .stat-card.high-card .stat-value { color: var(--high); }
+  .stat-card.med-card  .stat-value { color: var(--med); }
+  .stat-card.low-card  .stat-value { color: var(--low); }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 320px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dim);
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 9px 12px 9px 36px;
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-input::placeholder { color: var(--dim); }
+
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,212,255,0.15);
+  }
+
+  .sev-btns { display: flex; gap: 6px; }
+
+  .sev-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .sev-btn:hover { color: var(--text); border-color: var(--accent); }
+  .sev-btn.active-all  { color: var(--accent); border-color: var(--accent); background: rgba(0,212,255,0.08); }
+  .sev-btn.active-high { color: var(--high); border-color: var(--high); background: var(--high-bg); }
+  .sev-btn.active-med  { color: var(--med);  border-color: var(--med);  background: var(--med-bg); }
+  .sev-btn.active-low  { color: var(--low);  border-color: var(--low);  background: var(--low-bg); }
+
+  .results-count {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  /* Table */
+  .table-wrap {
+    border: 1px solid var(--border);
+    overflow: auto;
+    max-height: 520px;
+    background: var(--panel);
+    animation: fadeSlideUp 0.5s ease 0.25s both;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead { position: sticky; top: 0; z-index: 5; }
+
+  th {
+    background: #040a18;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    font-weight: 400;
+  }
+
+  th:first-child { color: var(--dim); }
+
+  td {
+    padding: 10px 14px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(15,42,74,0.6);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  tr { transition: background 0.15s; }
+  tr:hover td { background: rgba(0,212,255,0.04) !important; }
+
+  tr.sev-high td { background: rgba(255,60,92,0.07); }
+  tr.sev-med  td { background: rgba(255,176,32,0.06); }
+  tr.sev-low  td { background: rgba(0,255,157,0.04); }
+
+  .id-cell     { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--dim); }
+  .ip-cell     { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #fff; }
+  .attack-cell { color: var(--text); font-weight: 600; }
+  .risk-cell   { font-family: 'Share Tech Mono', monospace; font-size: 13px; }
+  .phase-cell  { color: var(--dim); font-size: 13px; }
+  .time-cell   { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--dim); }
+
+  .sev-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border: 1px solid;
+  }
+
+  .sev-badge.high   { color: var(--high); border-color: rgba(255,60,92,0.5);  background: var(--high-bg); }
+  .sev-badge.medium { color: var(--med);  border-color: rgba(255,176,32,0.5); background: var(--med-bg); }
+  .sev-badge.low    { color: var(--low);  border-color: rgba(0,255,157,0.4);  background: var(--low-bg); }
+
+  .sev-badge .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: blink 2s ease infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .empty-row td {
+    text-align: center;
+    padding: 48px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--dim);
+    letter-spacing: 2px;
+    font-size: 13px;
+  }
+
+  /* Scrollbar */
+  .table-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+  .table-wrap::-webkit-scrollbar-track { background: var(--bg); }
+  .table-wrap::-webkit-scrollbar-thumb { background: var(--border); }
+  .table-wrap::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* Footer */
+  .footer {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent3);
+    animation: blink 1.5s ease infinite;
+    flex-shrink: 0;
+  }
 </style>
 </head>
-
 <body>
+<div class="wrapper">
 
-<h2>SOC Attack History</h2>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L18 6V14L10 18L2 14V6L10 2Z" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+          <path d="M10 6L14 8V12L10 14L6 12V8L10 6Z" fill="rgba(0,212,255,0.3)"/>
+        </svg>
+      </div>
+      <div class="title-block">
+        <h1>Attack History</h1>
+        <p>SOC · THREAT INTELLIGENCE · MONITOR</p>
+      </div>
+    </div>
+    <button class="back-btn" onclick="location.href='/'">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M8 2L3 7L8 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      DASHBOARD
+    </button>
+  </div>
 
-<button onclick="location.href='/'">← Back to Dashboard</button>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card total">
+      <div class="stat-label">Total Events</div>
+      <div class="stat-value" id="cnt-total">—</div>
+    </div>
+    <div class="stat-card high-card">
+      <div class="stat-label">High Severity</div>
+      <div class="stat-value" id="cnt-high">—</div>
+    </div>
+    <div class="stat-card med-card">
+      <div class="stat-label">Medium Severity</div>
+      <div class="stat-value" id="cnt-med">—</div>
+    </div>
+    <div class="stat-card low-card">
+      <div class="stat-label">Low Severity</div>
+      <div class="stat-value" id="cnt-low">—</div>
+    </div>
+  </div>
 
-<input placeholder="Search IP" onkeyup="filterIP(this.value)">
+  <!-- Controls -->
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="#4a6278" stroke-width="1.2"/>
+        <path d="M9.5 9.5L12.5 12.5" stroke="#4a6278" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <input class="search-input" id="ipSearch" placeholder="SEARCH IP ADDRESS..." onkeyup="filterIP(this.value)">
+    </div>
+    <div class="sev-btns">
+      <button class="sev-btn active-all" onclick="setSev('', this)">ALL</button>
+      <button class="sev-btn" onclick="setSev('High', this)">HIGH</button>
+      <button class="sev-btn" onclick="setSev('Medium', this)">MED</button>
+      <button class="sev-btn" onclick="setSev('Low', this)">LOW</button>
+    </div>
+    <div class="results-count" id="res-count">— EVENTS</div>
+  </div>
 
-<select onchange="filterSeverity(this.value)">
-<option value="">All</option>
-<option value="High">High</option>
-<option value="Medium">Medium</option>
-<option value="Low">Low</option>
-</select>
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Source IP</th>
+          <th>Country</th>
+          <th>Attack Type</th>
+          <th>Severity</th>
+          <th>Risk Score</th>
+          <th>Kill Chain Phase</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody id="hist">
+        <tr class="empty-row"><td colspan="8">[ LOADING THREAT DATA... ]</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-<table>
-<thead>
-<tr>
-<th>ID</th><th>IP</th><th>Country</th><th>Attack</th>
-<th>Severity</th><th>Risk</th><th>Phase</th><th>Time</th>
-</tr>
-</thead>
-<tbody id="hist"></tbody>
-</table>
+  <!-- Footer -->
+  <div class="footer">
+    <div class="live-dot"></div>
+    LIVE FEED · AUTO-REFRESH 30s · CLASSIFICATION: INTERNAL USE ONLY
+  </div>
+
+</div>
 
 <script>
-let rows = [];
-const hist = document.getElementById("hist");
+  let rows = [];
+  let currentSev = '';
+  let currentIP = '';
+  let activeSevBtn = document.querySelector('.sev-btn.active-all');
 
-// Load data from backend
-fetch("/api/history")
-.then(r => r.json())
-.then(data => {
-    rows = data;
-    render(rows);
-})
-.catch(err => {
-    console.error("Error loading history:", err);
-    hist.innerHTML = "<tr><td colspan='8'>Failed to load data</td></tr>";
-});
+  const hist = document.getElementById("hist");
 
-// Render table
-function render(data){
-    let h = "";
-
-    data.forEach(r => {
-        let severity = r[7];
-
-        let c = severity === "High" ? "high" :
-                severity === "Medium" ? "medium" : "low";
-
-        h += `
-        <tr class="${c}">
-            <td>${r[0]}</td>
-            <td>${r[1]}</td>
-            <td>${r[2]}</td>
-            <td>${r[6]}</td>
-            <td>${r[7]}</td>
-            <td>${r[8]}</td>
-            <td>${r[13]}</td>
-            <td>${r[14]}</td>
-        </tr>`;
+  // Load data from backend
+  fetch("/api/history")
+    .then(r => r.json())
+    .then(data => {
+      rows = data;
+      updateStats(rows);
+      render(applyFilters());
+    })
+    .catch(err => {
+      console.error("Error loading history:", err);
+      hist.innerHTML = "<tr class='empty-row'><td colspan='8'>[ FAILED TO LOAD THREAT DATA ]</td></tr>";
     });
 
-    hist.innerHTML = h;
-}
+  function updateStats(data) {
+    document.getElementById('cnt-total').textContent = String(data.length).padStart(2, '0');
+    document.getElementById('cnt-high').textContent  = String(data.filter(r => r[7] === 'High').length).padStart(2, '0');
+    document.getElementById('cnt-med').textContent   = String(data.filter(r => r[7] === 'Medium').length).padStart(2, '0');
+    document.getElementById('cnt-low').textContent   = String(data.filter(r => r[7] === 'Low').length).padStart(2, '0');
+  }
 
-// Filter by IP
-function filterIP(v){
-    render(rows.filter(r => r[1].toLowerCase().includes(v.toLowerCase())));
-}
+  function applyFilters() {
+    return rows.filter(r => {
+      const ipMatch  = r[1].toLowerCase().includes(currentIP.toLowerCase());
+      const sevMatch = !currentSev || r[7] === currentSev;
+      return ipMatch && sevMatch;
+    });
+  }
 
-// Filter by severity
-function filterSeverity(v){
-    if(!v){
-        render(rows);
-    } else {
-        render(rows.filter(r => r[7] === v));
+  function render(data) {
+    document.getElementById('res-count').textContent = data.length + ' EVENTS';
+    if (!data.length) {
+      hist.innerHTML = "<tr class='empty-row'><td colspan='8'>[ NO MATCHING EVENTS ]</td></tr>";
+      return;
     }
-}
-</script>
+    hist.innerHTML = data.map((r, i) => {
+      const sev      = r[7] || 'Low';
+      const sevClass = sev === 'High' ? 'high' : sev === 'Medium' ? 'medium' : 'low';
+      const rowClass = sev === 'High' ? 'sev-high' : sev === 'Medium' ? 'sev-med' : 'sev-low';
+      const risk     = r[8];
+      const riskColor = risk >= 80 ? 'var(--high)' : risk >= 50 ? 'var(--med)' : 'var(--low)';
+      return `
+        <tr class="${rowClass}" style="animation: fadeSlideUp 0.3s ease ${i * 0.03}s both">
+          <td class="id-cell">${String(r[0]).padStart(4, '0')}</td>
+          <td class="ip-cell">${r[1]}</td>
+          <td class="country-cell">${r[2]}</td>
+          <td class="attack-cell">${r[6]}</td>
+          <td><span class="sev-badge ${sevClass}"><span class="dot"></span>${sev.toUpperCase()}</span></td>
+          <td class="risk-cell" style="color:${riskColor}">${risk}</td>
+          <td class="phase-cell">${r[13]}</td>
+          <td class="time-cell">${r[14]}</td>
+        </tr>`;
+    }).join('');
+  }
 
+  function filterIP(v) {
+    currentIP = v;
+    render(applyFilters());
+  }
+
+  function setSev(v, btn) {
+    currentSev = v;
+    if (activeSevBtn) activeSevBtn.className = 'sev-btn';
+    const cls = v === 'High' ? 'active-high' : v === 'Medium' ? 'active-med' : v === 'Low' ? 'active-low' : 'active-all';
+    btn.className = `sev-btn ${cls}`;
+    activeSevBtn = btn;
+    render(applyFilters());
+  }
+</script>
 </body>
 </html>
