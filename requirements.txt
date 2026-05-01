@@ -1,7 +1,7 @@
 flask
-requests
-matplotlib
-reportlab
 werkzeug
-gunicorn
+numpy
 joblib
+pandas
+scikit-learn
+gunicorn
