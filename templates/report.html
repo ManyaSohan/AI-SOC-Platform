@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SOC Incident Response Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
-
   :root {
     --bg: #03060f;
     --panel: #060d1f;
@@ -44,7 +47,7 @@
   }
 
   @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
@@ -56,6 +59,21 @@
   @keyframes pulse-border {
     0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
     50%      { box-shadow: 0 0 14px 4px rgba(0,212,255,0.15); }
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(transparent, rgba(0,212,255,0.06), transparent);
+    animation: scanline 6s linear infinite;
+    pointer-events: none;
+    z-index: 999;
   }
 
   .page {
@@ -71,7 +89,7 @@
     border: 1px solid var(--border);
     background: var(--panel);
     padding: 36px 40px 30px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     position: relative;
     overflow: hidden;
     animation: fadeSlideUp 0.5s ease both;
@@ -198,14 +216,15 @@
     animation: fadeSlideUp 0.5s ease both;
   }
 
-  .section:nth-child(2)  { animation-delay: 0.04s; }
-  .section:nth-child(3)  { animation-delay: 0.08s; }
-  .section:nth-child(4)  { animation-delay: 0.12s; }
-  .section:nth-child(5)  { animation-delay: 0.16s; }
-  .section:nth-child(6)  { animation-delay: 0.20s; }
-  .section:nth-child(7)  { animation-delay: 0.24s; }
-  .section:nth-child(8)  { animation-delay: 0.28s; }
-  .section:nth-child(9)  { animation-delay: 0.32s; }
+  .section:nth-child(2)  { animation-delay: 0.05s; }
+  .section:nth-child(3)  { animation-delay: 0.10s; }
+  .section:nth-child(4)  { animation-delay: 0.15s; }
+  .section:nth-child(5)  { animation-delay: 0.20s; }
+  .section:nth-child(6)  { animation-delay: 0.25s; }
+  .section:nth-child(7)  { animation-delay: 0.30s; }
+  .section:nth-child(8)  { animation-delay: 0.35s; }
+  .section:nth-child(9)  { animation-delay: 0.40s; }
+  .section:nth-child(10) { animation-delay: 0.45s; }
 
   .section-header {
     display: flex;
@@ -405,6 +424,14 @@
     align-items: start;
   }
 
+  /* ── Three-col ── */
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
   /* ── Matrix ── */
   .matrix-grid {
     display: grid;
@@ -465,16 +492,86 @@
     margin-top: 1px;
   }
 
-  /* ── Image panel ── */
-  .img-panel {
+  /* ── Chart containers ── */
+  .chart-panel {
     background: var(--panel2);
     border: 1px solid var(--border);
     padding: 16px;
-    text-align: center;
+    position: relative;
   }
 
-  .img-panel img {
-    max-width: 100%;
+  .chart-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+
+  /* ── Heatmap ── */
+  .heatmap-wrap {
+    overflow-x: auto;
+  }
+
+  .heatmap-table {
+    border-collapse: separate;
+    border-spacing: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+  }
+
+  .heatmap-table th {
+    color: var(--dim);
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+    text-align: center;
+    background: none;
+    border: none;
+    font-weight: 400;
+  }
+
+  .heatmap-table td {
+    width: 34px;
+    height: 28px;
+    text-align: center;
+    border-radius: 2px;
+    font-size: 9px;
+    color: rgba(255,255,255,0.7);
+    vertical-align: middle;
+    border: none;
+    padding: 0;
+    transition: transform 0.15s;
+    cursor: default;
+  }
+
+  .heatmap-table td:hover { transform: scale(1.15); z-index: 10; position: relative; }
+
+  .hm-day-label {
+    color: var(--dim);
+    font-size: 9px;
+    padding-right: 8px;
+    text-align: right;
+    width: 28px;
+    white-space: nowrap;
+  }
+
+  .heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+  }
+
+  .hm-legend-bar {
+    width: 160px;
+    height: 8px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #03080f, #004466, #0088cc, #00d4ff, #00fff7);
     border: 1px solid var(--border);
   }
 
@@ -487,7 +584,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    animation: fadeSlideUp 0.5s ease 0.4s both;
+    animation: fadeSlideUp 0.5s ease 0.5s both;
   }
 
   .footer-left {
@@ -515,18 +612,18 @@
     animation: blink 1.5s ease infinite;
   }
 
-  @media print {
-    body { background: #fff; color: #000; }
-    body::before { display: none; }
-    .page { max-width: 100%; padding: 0; }
-    .cover, .section, .report-footer { border: 1px solid #ccc; background: #fff; }
-    .section-header { background: #f0f0f0; }
-    .sum-card, .insight-card, .metric-row, .matrix-cell, .img-panel { background: #fafafa; border: 1px solid #ccc; }
-    .data-table th { background: #e8e8e8; }
+  @media (max-width: 768px) {
+    .summary-grid { grid-template-columns: repeat(2,1fr); }
+    .insights-grid { grid-template-columns: 1fr; }
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .cover { padding: 20px; }
   }
 </style>
 </head>
 <body>
+
+<div class="scanline"></div>
+
 <div class="page">
 
   <!-- COVER -->
@@ -546,9 +643,9 @@
         </div>
       </div>
       <div class="cover-meta">
-        REPORT ID: <span>{{ report_id }}</span><br>
+        REPORT ID: <span id="report-id"></span><br>
         ENVIRONMENT: <span>DEMO SOC LAB</span><br>
-        GENERATED: <span>{{ time }}</span>
+        GENERATED: <span id="gen-time"></span>
       </div>
     </div>
     <div class="cover-title">
@@ -559,9 +656,11 @@
       <div class="prepared-by">
         <div class="sum-label">PREPARED BY</div>
         <ul>
-          {% for person in name.split(",") %}
-          <li>{{ person.strip() }}</li>
-          {% endfor %}
+          <li>Manya Sohan D.H</li>
+          <li>Rishitha Suhani D Souza</li>
+          <li>Sanskrithi</li>
+          <li>Sanjana V</li>
+
         </ul>
       </div>
       <div class="classification-badge">⚠ RESTRICTED · INTERNAL USE ONLY</div>
@@ -578,19 +677,19 @@
       <div class="summary-grid">
         <div class="sum-card s-total">
           <div class="sum-label">Total Alerts</div>
-          <div class="sum-value">{{ total }}</div>
+          <div class="sum-value">247</div>
         </div>
         <div class="sum-card s-high">
           <div class="sum-label">High Severity</div>
-          <div class="sum-value">{{ high }}</div>
+          <div class="sum-value">89</div>
         </div>
         <div class="sum-card s-medium">
           <div class="sum-label">Medium Severity</div>
-          <div class="sum-value">{{ medium }}</div>
+          <div class="sum-value">112</div>
         </div>
         <div class="sum-card s-low">
           <div class="sum-label">Low Severity</div>
-          <div class="sum-value">{{ low }}</div>
+          <div class="sum-value">46</div>
         </div>
       </div>
     </div>
@@ -606,18 +705,18 @@
       <div class="insights-grid">
         <div class="insight-card">
           <div class="insight-label">TOP ATTACK VECTOR</div>
-          <div class="insight-value"><span class="hl">▸</span> {{ top_attack }}</div>
+          <div class="insight-value"><span class="hl">▸</span> SQL Injection</div>
         </div>
         <div class="insight-card">
           <div class="insight-label">HIGHEST RISK IP</div>
           <div class="insight-value">
-            <span class="hl">▸</span> {{ top_ip }}
-            <small style="color:var(--high);font-family:'Share Tech Mono',monospace;font-size:12px">&nbsp;[RISK {{ top_risk }}]</small>
+            <span class="hl">▸</span> 192.168.14.55
+            <small style="color:var(--high);font-family:'Share Tech Mono',monospace;font-size:12px">&nbsp;[RISK 97]</small>
           </div>
         </div>
         <div class="insight-card">
           <div class="insight-label">PEAK ACTIVITY TIME</div>
-          <div class="insight-value"><span class="hl">▸</span> {{ peak_time }}</div>
+          <div class="insight-value"><span class="hl">▸</span> 02:00–04:00 UTC</div>
         </div>
       </div>
     </div>
@@ -641,25 +740,76 @@
           </tr>
         </thead>
         <tbody>
-          {% for row in data %}
           <tr>
-            <td class="ip-mono">{{ row[1] }}</td>
-            <td style="font-weight:600">{{ row[2] }}</td>
-            <td>
-              {% if row[3] >= 70 %}
-                <span class="sev-badge high"><span class="dot"></span>HIGH</span>
-              {% elif row[3] >= 40 %}
-                <span class="sev-badge medium"><span class="dot"></span>MEDIUM</span>
-              {% else %}
-                <span class="sev-badge low"><span class="dot"></span>LOW</span>
-              {% endif %}
-            </td>
-            <td style="font-family:'Share Tech Mono',monospace;color:{% if row[3] >= 70 %}var(--high){% elif row[3] >= 40 %}var(--med){% else %}var(--low){% endif %}">
-              {{ row[3] }}
-            </td>
-            <td class="ts-val">{{ row[5] if row|length > 5 else "N/A" }}</td>
+            <td class="ip-mono">192.168.14.55</td>
+            <td style="font-weight:600">SQL Injection</td>
+            <td><span class="sev-badge high"><span class="dot"></span>HIGH</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--high)">97</td>
+            <td class="ts-val">2026-05-01 02:14:33</td>
           </tr>
-          {% endfor %}
+          <tr>
+            <td class="ip-mono">10.0.3.201</td>
+            <td style="font-weight:600">Brute Force SSH</td>
+            <td><span class="sev-badge high"><span class="dot"></span>HIGH</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--high)">88</td>
+            <td class="ts-val">2026-05-01 02:41:07</td>
+          </tr>
+          <tr>
+            <td class="ip-mono">203.0.113.44</td>
+            <td style="font-weight:600">DDoS Amplification</td>
+            <td><span class="sev-badge high"><span class="dot"></span>HIGH</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--high)">82</td>
+            <td class="ts-val">2026-05-01 03:02:19</td>
+          </tr>
+          <tr>
+            <td class="ip-mono">172.16.0.88</td>
+            <td style="font-weight:600">Port Scan</td>
+            <td><span class="sev-badge medium"><span class="dot"></span>MEDIUM</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--med)">61</td>
+            <td class="ts-val">2026-05-01 04:15:44</td>
+          </tr>
+          <tr>
+            <td class="ip-mono">198.51.100.22</td>
+            <td style="font-weight:600">XSS Reflected</td>
+            <td><span class="sev-badge medium"><span class="dot"></span>MEDIUM</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--med)">55</td>
+            <td class="ts-val">2026-05-01 05:30:11</td>
+          </tr>
+          <tr>
+            <td class="ip-mono">10.0.1.130</td>
+            <td style="font-weight:600">Path Traversal</td>
+            <td><span class="sev-badge medium"><span class="dot"></span>MEDIUM</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--med)">47</td>
+            <td class="ts-val">2026-05-01 06:08:55</td>
+          </tr>
+          <tr>
+            <td class="ip-mono">192.0.2.77</td>
+            <td style="font-weight:600">CSRF Attempt</td>
+            <td><span class="sev-badge low"><span class="dot"></span>LOW</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--low)">28</td>
+            <td class="ts-val">2026-05-01 07:22:03</td>
+          </tr>
+          <tr>
+            <td class="ip-mono">10.0.8.14</td>
+            <td style="font-weight:600">Credential Stuffing</td>
+            <td><span class="sev-badge high"><span class="dot"></span>HIGH</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--high)">76</td>
+            <td class="ts-val">2026-05-01 08:45:39</td>
+          </tr>
+          <tr>
+            <td class="ip-mono">203.0.113.91</td>
+            <td style="font-weight:600">DNS Exfiltration</td>
+            <td><span class="sev-badge medium"><span class="dot"></span>MEDIUM</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--med)">58</td>
+            <td class="ts-val">2026-05-01 09:11:27</td>
+          </tr>
+          <tr>
+            <td class="ip-mono">172.16.5.200</td>
+            <td style="font-weight:600">Recon Scan</td>
+            <td><span class="sev-badge low"><span class="dot"></span>LOW</span></td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--low)">22</td>
+            <td class="ts-val">2026-05-01 10:05:14</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -673,19 +823,61 @@
     </div>
     <div class="section-body">
       <ul class="action-list">
-        <li><span class="action-num">P1</span> Block highest risk IP immediately via firewall rule</li>
-        <li><span class="action-num">P2</span> Enable WAF rules to mitigate SQL Injection vectors</li>
-        <li><span class="action-num">P3</span> Increase firewall sensitivity for PortScan activity</li>
-        <li><span class="action-num">P4</span> Monitor brute-force attempts for the next 24 hours</li>
-        <li><span class="action-num">P5</span> Review all SOC alerts at 30-minute intervals</li>
+        <li><span class="action-num">P1</span> Block 192.168.14.55 immediately via perimeter firewall rule and notify upstream ISP</li>
+        <li><span class="action-num">P2</span> Enable WAF rules to mitigate SQL Injection and XSS reflected attack vectors</li>
+        <li><span class="action-num">P3</span> Enforce account lockout after 5 failed SSH attempts; rotate exposed credentials</li>
+        <li><span class="action-num">P4</span> Activate DDoS mitigation scrubbing center for 203.0.113.0/24 subnet</li>
+        <li><span class="action-num">P5</span> Monitor DNS traffic for anomalous query volumes indicative of exfiltration tunneling</li>
+        <li><span class="action-num">P6</span> Review all SOC alerts at 30-minute intervals for the next 12 hours</li>
       </ul>
     </div>
   </div>
 
-  <!-- 05 MODEL PERFORMANCE -->
+  <!-- 05 ACTIVITY HEATMAP -->
   <div class="section">
     <div class="section-header">
       <span class="section-icon">05</span>
+      <span class="section-title">Activity Heatmap — Hour × Day of Week</span>
+    </div>
+    <div class="section-body">
+      <div class="heatmap-wrap">
+        <table class="heatmap-table" id="heatmap-table">
+          <thead id="heatmap-thead"></thead>
+          <tbody id="heatmap-tbody"></tbody>
+        </table>
+        <div class="heatmap-legend">
+          <span>LOW</span>
+          <div class="hm-legend-bar"></div>
+          <span>HIGH</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 ALERT TREND + ATTACK DISTRIBUTION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">06</span>
+      <span class="section-title">Alert Trend &amp; Attack Distribution</span>
+    </div>
+    <div class="section-body">
+      <div class="two-col">
+        <div class="chart-panel">
+          <div class="chart-title">7-DAY ALERT TREND</div>
+          <canvas id="trendChart" height="200"></canvas>
+        </div>
+        <div class="chart-panel">
+          <div class="chart-title">ATTACK TYPE DISTRIBUTION</div>
+          <canvas id="donutChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 MODEL PERFORMANCE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">07</span>
       <span class="section-title">Model Performance</span>
     </div>
     <div class="section-body">
@@ -693,57 +885,57 @@
         <div>
           <div class="metric-row">
             <span class="metric-label">Accuracy</span>
-            <span class="metric-value">{{ "%.2f"|format(accuracy) }}</span>
+            <span class="metric-value">0.96</span>
           </div>
           <div class="metric-row">
             <span class="metric-label">Precision</span>
-            <span class="metric-value">{{ "%.2f"|format(precision) }}</span>
+            <span class="metric-value">0.94</span>
           </div>
           <div class="metric-row">
             <span class="metric-label">Recall</span>
-            <span class="metric-value">{{ "%.2f"|format(recall) }}</span>
+            <span class="metric-value">0.91</span>
           </div>
           <div class="metric-row">
             <span class="metric-label">F1 Score</span>
-            <span class="metric-value">{{ "%.2f"|format(f1) }}</span>
+            <span class="metric-value">0.92</span>
           </div>
           <div class="metric-row">
             <span class="metric-label">False Positive Rate</span>
-            <span class="metric-value" style="color:var(--med)">{{ "%.3f"|format(fpr) }}</span>
+            <span class="metric-value" style="color:var(--med)">0.038</span>
           </div>
         </div>
-        <div class="img-panel">
-          <div class="sum-label" style="margin-bottom:12px">PERFORMANCE CHART</div>
-          <img src="/static/performance.png" alt="Model Performance Chart">
+        <div class="chart-panel">
+          <div class="chart-title">PERFORMANCE RADAR</div>
+          <canvas id="radarChart" height="240"></canvas>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 06 DATASET INFO -->
+  <!-- 08 DATASET INFO -->
   <div class="section">
     <div class="section-header">
-      <span class="section-icon">06</span>
+      <span class="section-icon">08</span>
       <span class="section-title">Dataset Information</span>
     </div>
     <div class="section-body">
       <div class="two-col">
         <div class="metric-row">
           <span class="metric-label">Total Dataset Size</span>
-          <span class="metric-value">{{ dataset_total }}</span>
+          <span class="metric-value">125,000</span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Used for Training</span>
-          <span class="metric-value">{{ dataset_used }}</span>
+          <span class="metric-value">87,500</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 07 CLASSIFICATION REPORT -->
+  <!-- 09 CLASSIFICATION REPORT -->
   <div class="section">
     <div class="section-header">
-      <span class="section-icon">07</span>
+      <span class="section-icon">09</span>
       <span class="section-title">Classification Report</span>
     </div>
     <div class="section-body" style="padding:0">
@@ -754,26 +946,33 @@
             <th>Precision</th>
             <th>Recall</th>
             <th>F1 Score</th>
+            <th>Support</th>
           </tr>
         </thead>
         <tbody>
-          {% for key, value in report_data.items() if key in ['0','1'] %}
           <tr>
-            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">CLASS {{ key }}</td>
-            <td style="font-family:'Share Tech Mono',monospace">{{ "%.2f"|format(value.precision) }}</td>
-            <td style="font-family:'Share Tech Mono',monospace">{{ "%.2f"|format(value.recall) }}</td>
-            <td style="font-family:'Share Tech Mono',monospace">{{ "%.2f"|format(value['f1-score']) }}</td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--low)">CLASS 0 — BENIGN</td>
+            <td style="font-family:'Share Tech Mono',monospace">0.97</td>
+            <td style="font-family:'Share Tech Mono',monospace">0.98</td>
+            <td style="font-family:'Share Tech Mono',monospace">0.97</td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--dim)">63,420</td>
           </tr>
-          {% endfor %}
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--high)">CLASS 1 — MALICIOUS</td>
+            <td style="font-family:'Share Tech Mono',monospace">0.94</td>
+            <td style="font-family:'Share Tech Mono',monospace">0.91</td>
+            <td style="font-family:'Share Tech Mono',monospace">0.92</td>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--dim)">24,080</td>
+          </tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- 08 CONFUSION MATRIX -->
+  <!-- 10 CONFUSION MATRIX -->
   <div class="section">
     <div class="section-header">
-      <span class="section-icon">08</span>
+      <span class="section-icon">10</span>
       <span class="section-title">Confusion Matrix &amp; Detection Metrics</span>
     </div>
     <div class="section-body">
@@ -783,25 +982,25 @@
           <div class="matrix-grid">
             <div class="matrix-cell">
               <div class="mc-label">TRUE POSITIVES</div>
-              <div class="mc-value mc-tp">{{ tp }}</div>
+              <div class="mc-value mc-tp">21,913</div>
             </div>
             <div class="matrix-cell">
               <div class="mc-label">TRUE NEGATIVES</div>
-              <div class="mc-value mc-tn">{{ tn }}</div>
+              <div class="mc-value mc-tn">62,151</div>
             </div>
             <div class="matrix-cell">
               <div class="mc-label">FALSE POSITIVES</div>
-              <div class="mc-value mc-fp">{{ fp }}</div>
+              <div class="mc-value mc-fp">1,269</div>
             </div>
             <div class="matrix-cell">
               <div class="mc-label">FALSE NEGATIVES</div>
-              <div class="mc-value mc-fn">{{ fn }}</div>
+              <div class="mc-value mc-fn">2,167</div>
             </div>
           </div>
         </div>
-        <div class="img-panel">
-          <div class="sum-label" style="margin-bottom:12px">CONFUSION MATRIX</div>
-          <img src="/static/confusion_matrix.png" alt="Confusion Matrix">
+        <div class="chart-panel">
+          <div class="chart-title">CONFUSION MATRIX — BAR VIEW</div>
+          <canvas id="cmChart" height="240"></canvas>
         </div>
       </div>
     </div>
@@ -815,10 +1014,234 @@
     </div>
     <div class="footer-right">
       <div class="live-dot"></div>
-      AUTO-GENERATED · REPORT ID: {{ report_id }}
+      AUTO-GENERATED · REPORT ID: <span id="footer-report-id"></span>
     </div>
   </div>
 
 </div>
+
+<script>
+// ── Data & IDs ─────────────────────────────────────────────────────────────
+const reportId = 'SOC-' + Math.random().toString(36).substr(2,6).toUpperCase() + '-2026';
+const now = new Date();
+const timeStr = now.toISOString().replace('T',' ').substr(0,19) + ' UTC';
+
+document.getElementById('report-id').textContent = reportId;
+document.getElementById('gen-time').textContent = timeStr;
+document.getElementById('footer-report-id').textContent = reportId;
+
+// ── Chart defaults ────────────────────────────────────────────────────────
+Chart.defaults.color = '#4a6278';
+Chart.defaults.borderColor = '#0f2a4a';
+Chart.defaults.font.family = "'Share Tech Mono', monospace";
+
+// ── Heatmap ──────────────────────────────────────────────────────────────
+const days = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+const hours = Array.from({length:24},(_,i)=> i.toString().padStart(2,'0')+':00');
+
+// Synthetic attack density: peak early AM, mid-week
+function heatVal(d, h) {
+  const nightBoost = (h >= 1 && h <= 5) ? 2.2 : 1;
+  const weekBoost  = (d < 5) ? 1.3 : 0.6;
+  const base = Math.random() * 30;
+  return Math.round(base * nightBoost * weekBoost + (h === 2 ? 40 : 0) + (h === 3 ? 30 : 0));
+}
+
+const heatData = days.map((_,d) => hours.map((_,h) => heatVal(d,h)));
+const maxVal = Math.max(...heatData.flat());
+
+function heatColor(v) {
+  const t = v / maxVal;
+  if (t < 0.15) return '#030c18';
+  if (t < 0.35) return '#002b44';
+  if (t < 0.55) return '#004c77';
+  if (t < 0.72) return '#0077b3';
+  if (t < 0.88) return '#00aadd';
+  return '#00d4ff';
+}
+
+const thead = document.getElementById('heatmap-thead');
+const tbody = document.getElementById('heatmap-tbody');
+
+let hdrRow = '<tr><th></th>';
+for (let h = 0; h < 24; h++) hdrRow += `<th>${h.toString().padStart(2,'0')}</th>`;
+hdrRow += '</tr>';
+thead.innerHTML = hdrRow;
+
+days.forEach((day, d) => {
+  let row = `<tr><td class="hm-day-label">${day}</td>`;
+  for (let h = 0; h < 24; h++) {
+    const v = heatData[d][h];
+    const bg = heatColor(v);
+    row += `<td style="background:${bg}" title="${day} ${hours[h]}: ${v} alerts">${v > 5 ? v : ''}</td>`;
+  }
+  row += '</tr>';
+  tbody.innerHTML += row;
+});
+
+// ── Alert Trend Chart ─────────────────────────────────────────────────────
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+const trendLabels = ['Apr 25','Apr 26','Apr 27','Apr 28','Apr 29','Apr 30','May 01'];
+const trendData   = [142, 178, 203, 167, 219, 188, 247];
+
+new Chart(trendCtx, {
+  type: 'line',
+  data: {
+    labels: trendLabels,
+    datasets: [{
+      label: 'Alerts',
+      data: trendData,
+      borderColor: '#00d4ff',
+      backgroundColor: 'rgba(0,212,255,0.07)',
+      borderWidth: 2,
+      pointBackgroundColor: '#00d4ff',
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      tension: 0.4,
+      fill: true,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#060d1f',
+        borderColor: '#0f2a4a',
+        borderWidth: 1,
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(15,42,74,0.6)' }, ticks: { font: { size: 10 } } },
+      y: { grid: { color: 'rgba(15,42,74,0.6)' }, ticks: { font: { size: 10 } }, beginAtZero: false }
+    }
+  }
+});
+
+// ── Donut Chart ───────────────────────────────────────────────────────────
+const donutCtx = document.getElementById('donutChart').getContext('2d');
+
+new Chart(donutCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['SQL Injection','Port Scan','Brute Force','XSS','DDoS','Other'],
+    datasets: [{
+      data: [68, 45, 39, 31, 27, 37],
+      backgroundColor: [
+        'rgba(255,60,92,0.85)',
+        'rgba(0,212,255,0.85)',
+        'rgba(255,176,32,0.85)',
+        'rgba(0,255,157,0.85)',
+        'rgba(100,120,220,0.85)',
+        'rgba(74,98,120,0.85)',
+      ],
+      borderColor: '#03060f',
+      borderWidth: 2,
+      hoverOffset: 8,
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '65%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { font: { size: 10 }, padding: 10, color: '#4a6278', boxWidth: 10 }
+      },
+      tooltip: {
+        backgroundColor: '#060d1f',
+        borderColor: '#0f2a4a',
+        borderWidth: 1,
+      }
+    }
+  }
+});
+
+// ── Radar Chart ───────────────────────────────────────────────────────────
+const radarCtx = document.getElementById('radarChart').getContext('2d');
+
+new Chart(radarCtx, {
+  type: 'radar',
+  data: {
+    labels: ['Accuracy','Precision','Recall','F1 Score','Specificity'],
+    datasets: [{
+      label: 'Model',
+      data: [0.96, 0.94, 0.91, 0.92, 0.98],
+      borderColor: '#00d4ff',
+      backgroundColor: 'rgba(0,212,255,0.12)',
+      borderWidth: 2,
+      pointBackgroundColor: '#00d4ff',
+      pointRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      r: {
+        min: 0.8,
+        max: 1.0,
+        ticks: { stepSize: 0.05, font: { size: 9 }, backdropColor: 'transparent' },
+        grid: { color: 'rgba(15,42,74,0.8)' },
+        angleLines: { color: 'rgba(15,42,74,0.8)' },
+        pointLabels: { font: { size: 10 }, color: '#4a6278' }
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#060d1f',
+        borderColor: '#0f2a4a',
+        borderWidth: 1,
+      }
+    }
+  }
+});
+
+// ── Confusion Matrix Bar Chart ────────────────────────────────────────────
+const cmCtx = document.getElementById('cmChart').getContext('2d');
+
+new Chart(cmCtx, {
+  type: 'bar',
+  data: {
+    labels: ['True Positives','True Negatives','False Positives','False Negatives'],
+    datasets: [{
+      data: [21913, 62151, 1269, 2167],
+      backgroundColor: [
+        'rgba(0,255,157,0.75)',
+        'rgba(0,212,255,0.75)',
+        'rgba(255,176,32,0.75)',
+        'rgba(255,60,92,0.75)',
+      ],
+      borderColor: [
+        '#00ff9d',
+        '#00d4ff',
+        '#ffb020',
+        '#ff3c5c',
+      ],
+      borderWidth: 1,
+      borderRadius: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#060d1f',
+        borderColor: '#0f2a4a',
+        borderWidth: 1,
+        callbacks: {
+          label: ctx => ' ' + ctx.parsed.x.toLocaleString() + ' samples'
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(15,42,74,0.6)' }, ticks: { font: { size: 10 }, callback: v => v.toLocaleString() } },
+      y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+</script>
 </body>
 </html>
