@@ -60,12 +60,28 @@ except Exception as e:
     model = None
 
 # ================= DATASET =================
-df = pd.read_csv("dataset/integrated_dataset_ultrafast/integrated_ciciot2023_dataset.csv")
+try:
+    df = pd.read_csv("dataset/integrated_dataset_ultrafast/integrated_ciciot2023_dataset.csv")
+    print("✅ Dataset loaded")
+except Exception as e:
+    print("❌ Dataset load failed:", e)
+    df = pd.DataFrame()
+
 countries = ["India","USA","Germany","Brazil","China","Russia","UK"]
 
-# ================= LOAD METRICS =================
-with open("metrics.json") as f:
-    metrics = json.load(f)
+# ================= METRICS =================
+try:
+    with open("metrics.json") as f:
+        metrics = json.load(f)
+except Exception as e:
+    print("❌ Metrics load failed:", e)
+    metrics = {
+        "accuracy":0,"precision":0,"recall":0,"f1":0,"fpr":0,
+        "false_positives":0,"false_negatives":0,
+        "true_positives":0,"true_negatives":0,
+        "classification_report":{},
+        "dataset_total":0,"dataset_used":0
+    }
 
 # ================= LOGIN =================
 @app.route("/login", methods=["GET","POST"])
@@ -141,19 +157,9 @@ def report():
     top_ip = max(rows, key=lambda x: x[3])[1] if rows else "N/A"
     top_risk = max(rows, key=lambda x: x[3])[3] if rows else 0
 
-    # ================= METRICS =================
-    recall = metrics["recall"]
-    f1 = metrics["f1"]
-    fpr = metrics["fpr"]
-
-    fp = metrics["false_positives"]
-    fn = metrics["false_negatives"]
-    tp = metrics["true_positives"]
-    tn = metrics["true_negatives"]
-
     return render_template(
         "report.html",
-        name="Manya Sohan D.H, Rishitha Suhani D Souza, Sanskrithi, Sanjana V Hathwar",
+        name="SOC Report",
         report_id=f"SOC-{random.randint(1000000000,9999999999)}",
         time=datetime.now(),
         total=total,
@@ -165,22 +171,10 @@ def report():
         top_risk=top_risk,
         peak_time=datetime.now(),
         data=rows,
-
-        # BASIC METRICS
         accuracy=metrics["accuracy"],
         precision=metrics["precision"],
-        report_data=metrics["classification_report"],
-        dataset_total=metrics["dataset_total"],
-        dataset_used=metrics["dataset_used"],
-
-        # ADVANCED METRICS
-        recall=recall,
-        f1=f1,
-        fpr=fpr,
-        fp=fp,
-        fn=fn,
-        tp=tp,
-        tn=tn
+        recall=metrics["recall"],
+        f1=metrics["f1"]
     )
 
 # ================= AI PREDICT =================
@@ -220,7 +214,11 @@ def predict():
 # ================= LOGS =================
 @app.route("/logs")
 def logs():
-    sample = df.sample(10)
+
+    if df.empty:
+        return jsonify([])
+
+    sample = df.sample(min(10, len(df)))
     data = []
 
     for i, row in sample.iterrows():
@@ -282,4 +280,4 @@ def update_incident(id):
 
 # ================= RUN =================
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
