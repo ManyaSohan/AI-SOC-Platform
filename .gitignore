@@ -1,6 +1,11 @@
 venv/
 __pycache__/
 *.pyc
+.env
 soc.db
 reports/
-.env
+
+# 🔥 ADD THESE (VERY IMPORTANT)
+dataset/
+ai_model/
+*.pkl
