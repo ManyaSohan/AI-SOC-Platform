@@ -6,10 +6,11 @@ import joblib
 import pandas as pd
 import random
 import json
+import os
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = "secret123"
+app.secret_key = os.environ.get("SECRET_KEY", "secret123")
 
 DB = "soc.db"
 
@@ -216,7 +217,26 @@ def predict():
 def logs():
 
     if df.empty:
-        return jsonify([])
+        # Return mock data if dataset not loaded
+        data = []
+        for i in range(10):
+            data.append([
+                i,
+                f"{random.randint(1,255)}.{random.randint(0,255)}.{random.randint(0,255)}.{random.randint(0,255)}",
+                random.choice(countries),
+                random.randint(100,3000),
+                random.randint(0,1),
+                random.randint(0,1),
+                random.choice(["Normal", "Attack"]),
+                random.choice(["Low", "High"]),
+                random.randint(20,100),
+                "T1499",
+                0,
+                0,
+                "Execution",
+                datetime.now().strftime("%H:%M:%S")
+            ])
+        return jsonify(data)
 
     sample = df.sample(min(10, len(df)))
     data = []
