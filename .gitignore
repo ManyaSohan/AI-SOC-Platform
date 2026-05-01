@@ -5,7 +5,8 @@ __pycache__/
 soc.db
 reports/
 
-# 🔥 ADD THESE (VERY IMPORTANT)
+# 🔥 IMPORTANT
 dataset/
+datasetintegrated_dataset_ultrafast/
 ai_model/
 *.pkl
