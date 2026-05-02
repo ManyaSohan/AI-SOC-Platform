@@ -197,35 +197,20 @@ AI-SOC-Platform/
 
 ## Screenshots
 
-<details>
-<summary><b>🔐 Login Page</b></summary>
+### 🔐 Login Page
+![Login Page](https://raw.githubusercontent.com/ManyaSohan/AI-SOC-Platform/main/screenshots/a.png)
 
-![Login](screenshots/a.png)
-</details>
+### 🖥️ Dashboard
+![Dashboard](https://raw.githubusercontent.com/ManyaSohan/AI-SOC-Platform/main/screenshots/b.png)
 
-<details>
-<summary><b>🖥️ Dashboard</b></summary>
+### 📊 Data / Graph View
+![Graph View](https://raw.githubusercontent.com/ManyaSohan/AI-SOC-Platform/main/screenshots/c.png)
 
-![Dashboard](screenshots/b.png)
-</details>
+### 🚨 Incidents / Logs
+![Incidents](https://raw.githubusercontent.com/ManyaSohan/AI-SOC-Platform/main/screenshots/d.png)
 
-<details>
-<summary><b>📊 Data / Graph View</b></summary>
-
-![Graph](screenshots/c.png)
-</details>
-
-<details>
-<summary><b>🚨 Incidents / Logs</b></summary>
-
-![Incidents](screenshots/d.png)
-</details>
-
-<details>
-<summary><b>⚙️ Terminal / Backend Output</b></summary>
-
-![Terminal](screenshots/e.png)
-</details>
+### ⚙️ Terminal / Backend Output
+![Terminal](https://raw.githubusercontent.com/ManyaSohan/AI-SOC-Platform/main/screenshots/e.png)
 
 ---
 
